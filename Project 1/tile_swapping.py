@@ -2,8 +2,6 @@ import heapq
 import copy
 from timeit import default_timer as timer #https://stackoverflow.com/a/25823885
 
-
-
 states_hash = {}
 
 goal_state = []
@@ -84,8 +82,11 @@ def manhattan(state, n):
                 total += (abs(i - correct_row) + abs(j - correct_index))
     return total
 
-def swapping_tiles(state):
+def swapping_tiles(state, n):
     pass
+
+def none(state, n):
+    return 0
 
 def general_search(initial_state, heuristic, n):
     max_nodes = -1
@@ -96,10 +97,10 @@ def general_search(initial_state, heuristic, n):
         count += 1
         max_nodes = max(max_nodes, len(nodes))
         if len(nodes) == 0:
-            return False
+            return False, max_nodes
         node = heapq.heappop(nodes)
         if at_goal(node):
-            return node
+            return node, max_nodes
         nodes_to_add = expand(node) # Returns nodes with candidate states
         for to_add in nodes_to_add:
             to_add[4] = node # Set parent node
@@ -109,13 +110,16 @@ def general_search(initial_state, heuristic, n):
             heapq.heappush(nodes, to_add)
 
 start_state = []
-start_state.append([1,2,3])
+start_state.append([2,1,3])
 start_state.append([4,5,6])
 start_state.append([8,7,0])
+
 start = timer()
-node = general_search(start_state, manhattan, 3)
+node, max_nodes = general_search(start_state, none, 3)
 end = timer()
-print("Time elapsed: " + str(end - start))
+
+print("Time elapsed: " + str(end - start) + " seconds, with a maximum number of " + str(max_nodes) + " node(s) in the queue at once.")
+
 if not(node):
     print("Failed")
 else:
