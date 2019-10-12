@@ -1,5 +1,10 @@
 import heapq
 import copy
+from timeit import default_timer as timer #https://stackoverflow.com/a/25823885
+
+
+
+states_hash = {}
 
 goal_state = []
 goal_state.append([1,2,3])
@@ -11,6 +16,14 @@ def make_node(key = -1, g_n = -1, h_n = -1, state = -1, parent = -1):
 
 def at_goal(node):
     return True if node[3] == goal_state else False
+
+def get_key(state):
+    triple = ''
+    for i, row in enumerate(state):
+        for j, value in enumerate(row):
+            triple += ''.join([str(i), str(j), str(value)])
+    triple = hash(int(triple))
+    return triple
 
 def expand(node):
     state = node[3]
@@ -26,50 +39,34 @@ def expand(node):
             pass
     if row - 1 >= 0:
         to_modify[row][col], to_modify[row - 1][col] = to_modify[row - 1][col], to_modify[row][col] # Swap with above
-        backtrack_node = node[4]
-        while not(backtrack_node[3] == -1):
-            if backtrack_node[3] == to_modify:
-                print("found parent 1", backtrack_node[3])
-                break
-            backtrack_node = backtrack_node[4]
-        else:
+        key = get_key(to_modify)
+        if key not in states_hash:
+            states_hash[key] = 1
             expanded_states.append(copy.deepcopy(to_modify))
         to_modify = copy.deepcopy(state)
 
     if row + 1 < len(state[0]):
         to_modify[row][col], to_modify[row + 1][col] = to_modify[row + 1][col], to_modify[row][col] # Swap with below
-        backtrack_node = node[4]
-        while not(backtrack_node[3] == -1):
-            if backtrack_node[3] == to_modify:
-                print("found parent 2", backtrack_node[3])
-                break
-            backtrack_node = backtrack_node[4]
-        else:
+        key = get_key(to_modify)
+        if key not in states_hash:
+            states_hash[key] = 1
             expanded_states.append(copy.deepcopy(to_modify))
         to_modify = copy.deepcopy(state)
 
     if col - 1 >= 0:
         to_modify[row][col], to_modify[row][col - 1] = to_modify[row][col - 1], to_modify[row][col] # Swap with left ALLOWING ACCESS AT -1
-        backtrack_node = node[4]
-        while not(backtrack_node[3] == -1):
-            if backtrack_node[3] == to_modify:
-                print("found parent 3", backtrack_node[3])
-                break
-            backtrack_node = backtrack_node[4]
-        else:
+        key = get_key(to_modify)
+        if key not in states_hash:
+            states_hash[key] = 1
             expanded_states.append(copy.deepcopy(to_modify))
         to_modify = copy.deepcopy(state)
 
     if col + 1 < len(state[0]):
         to_modify[row][col], to_modify[row][col + 1] = to_modify[row][col + 1], to_modify[row][col] # Swap with right
-        backtrack_node = node[4]
-        while not(backtrack_node[3] == -1):
-            if backtrack_node[3] == to_modify:
-                print("found parent 4", backtrack_node[3])
-                break
-            backtrack_node = backtrack_node[4]
-        else:
-            expanded_states.append(copy.deepcopy(to_modify))
+        key = get_key(to_modify)
+        if key not in states_hash:
+           states_hash[key] = 1
+           expanded_states.append(copy.deepcopy(to_modify))
         to_modify = copy.deepcopy(state)
 
     for t_state in expanded_states:
@@ -101,7 +98,6 @@ def general_search(initial_state, heuristic, n):
         if len(nodes) == 0:
             return False
         node = heapq.heappop(nodes)
-        print(node[1])
         if at_goal(node):
             return node
         nodes_to_add = expand(node) # Returns nodes with candidate states
@@ -111,20 +107,18 @@ def general_search(initial_state, heuristic, n):
             to_add[1] = node[1] + 1 # Add 1 to parent g_n (costs are all 1)
             to_add[0] = to_add[1] + to_add[2] # Combine g_n and h_n to get f_n
             heapq.heappush(nodes, to_add)
-        if count == 5:
-            for node in nodes:
-                print(node)
-            break
-
 
 start_state = []
 start_state.append([1,2,3])
 start_state.append([4,5,6])
 start_state.append([8,7,0])
-
+start = timer()
 node = general_search(start_state, manhattan, 3)
+end = timer()
+print("Time elapsed: " + str(end - start))
 if not(node):
     print("Failed")
-while not(node[3] == -1):
-    print(node[3], node[1])
-    node = node[4]
+else:
+    while not(node[3] == -1):
+        print(node[3], node[1])
+        node = node[4]
