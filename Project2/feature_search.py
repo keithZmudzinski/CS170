@@ -4,9 +4,17 @@ import sys
 
 def get_data():
 	data = pd.read_csv('CS170_SMALLtestdata__1.txt', delim_whitespace = True, skipinitialspace=True, header=None)
-	means = data.apply(numpy.mean)
-	std_deviations = data.apply(numpy.std)
-	data = data.apply(lambda x : (x - means) / std_deviations)
+	# saved_classes = data.iloc[:, 0].copy()
+	# print('Initial untouched  data:\n', data)
+	# means = data.apply(numpy.mean)
+	# # print('Data after numpy.mean applied:\n', means)
+	# std_deviations = data.apply(numpy.std)
+	# # print('Data after numpy.std applied:\n', std_deviations)
+	# data = data.apply(lambda x : (x - means) / std_deviations)
+	# sys.exit(1)
+	data = (data - data.mean()) / data.std()
+	# data.iloc[:, 0] = saved_classes
+	print(data)
 	return data
 
 def calc_distance(row, features, test_row):
@@ -16,16 +24,34 @@ def calc_distance(row, features, test_row):
 	return sum
 
 def one_nearest_neighbor(data, features, test_row_index):
-	distances = data.apply(calc_distance, axis = 1, args = [features, data.iloc[test_row_index]])
-	distances =  distances.drop(test_row_index)
-	smallest_distance = sys.float_info.max
-	index = -1
-	for i, distance in enumerate(distances):
-		if distance < smallest_distance:
-			smallest_distance = distance
-			index = i
-	# sys.exit(1)
-	return data.iat[index, 0]
+	# distances = data.apply(calc_distance, axis = 1, args = [features, data.iloc[test_row_index]])
+	# distances =  distances.drop(test_row_index)
+	# smallest_distance = sys.float_info.max
+	# index = -1
+	# for i, distance in enumerate(distances):
+	# 	if distance < smallest_distance:
+	# 		smallest_distance = distance
+	# 		index = i
+	# # sys.exit(1)
+	# return data.iat[index, 0]
+    smallest_distance = sys.float_info.max
+    guessed_class_index = -1
+    for i in range(len(data.index)):
+        sum = 0
+        for feature in features:
+            temp1 = data.iat[i, feature]
+            temp2 = data.iat[test_row_index, feature]
+            # print(temp2)
+            sum += (temp1 - temp2) ** 2
+        curr_dist = sum
+        # print(curr_dist)
+        if curr_dist < smallest_distance and i != test_row_index:
+            smallest_distance = curr_dist
+            guessed_class_index = i
+    # print(smallest_distance, curr_dist)
+    return data.iat[guessed_class_index, 0]
+
+
 
 def leave_1_out_cross_validation(data, current_set, feature_to_add, best_so_far_accuracy):
 	MAX_ALLOWED_INCORRECT = len(data.index) * (1 - best_so_far_accuracy)
@@ -72,6 +98,7 @@ def feature_search(data):
 
 if __name__ == '__main__':
 	data = get_data()
+	# print(data)
 	features, accuracies = feature_search(data)
 	for feature, accuracy in zip(features, accuracies):
 		print(feature, accuracy)
