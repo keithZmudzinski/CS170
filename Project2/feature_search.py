@@ -3,10 +3,10 @@ import math, sys
 
 def get_data(input_data_file):
 	data = pd.read_csv(input_data_file, delim_whitespace = True, skipinitialspace=True, header=None)
-	print('This dataset has %d features (not including the class attribute), with %d instances.\n' % (data.shape[1] - 1, len(data.index)), file=output_file)
-	print('Please wait while I normalize the data...', end = '', file = output_file)
+	print('This dataset has %d features (not including the class attribute), with %d instances.\n' % (data.shape[1] - 1, len(data.index)))
+	print('Please wait while I normalize the data...', end = '')
 	data = (data - data.mean()) / data.std()
-	print(' Done!\n', file = output_file)
+	print(' Done!\n')
 	return data
 
 def one_nearest_neighbor(data, features, test_row_index, distances):
@@ -143,7 +143,9 @@ feature_selection = bck_feature_search if choice == '2' else fwd_feature_search
 isSpecial = True if choice == '3' else False
 
 data = get_data(input_data_file)
+start_time = time.time()
 features, accuracies = feature_selection(data, isSpecial)
+end_time = time.time()
 best_accuracy = max(accuracies)
 best_features = features[accuracies.index(best_accuracy)]
 best_features = '{' + ', '.join([str(feature) for feature in best_features]) + '}'
