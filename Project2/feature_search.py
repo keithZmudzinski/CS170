@@ -124,7 +124,6 @@ def bck_feature_search(data, ignore):
 		sets_of_features.append(current_set_of_features[:])
 	return sets_of_features, accuracies
 
-
 output_string = ''
 smallest_unadded_feature = -1
 
@@ -143,9 +142,7 @@ feature_selection = bck_feature_search if choice == '2' else fwd_feature_search
 isSpecial = True if choice == '3' else False
 
 data = get_data(input_data_file)
-start_time = time.time()
 features, accuracies = feature_selection(data, isSpecial)
-end_time = time.time()
 best_accuracy = max(accuracies)
 best_features = features[accuracies.index(best_accuracy)]
 best_features = '{' + ', '.join([str(feature) for feature in best_features]) + '}'
